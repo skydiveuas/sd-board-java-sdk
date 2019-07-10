@@ -1,6 +1,6 @@
-package com.skydive.java;
+package com.skydive;
 
-import com.skydive.java.data.SignalData;
+import com.skydive.data.SignalData;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;

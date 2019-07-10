@@ -1,4 +1,4 @@
-package com.skydive.java;
+package com.skydive;
 
 /**
  * Created by Bartosz Nawrot on 2016-10-14.

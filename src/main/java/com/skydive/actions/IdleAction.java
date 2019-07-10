@@ -1,9 +1,9 @@
-package com.skydive.java.actions;
+package com.skydive.actions;
 
-import com.skydive.java.CommHandler;
-import com.skydive.java.events.CommEvent;
+import com.skydive.CommHandler;
+import com.skydive.events.CommEvent;
 
-import static com.skydive.java.actions.CommHandlerAction.ActionType.IDLE;
+import static com.skydive.actions.CommHandlerAction.ActionType.IDLE;
 
 /**
  * Created by NawBar on 2016-10-12.

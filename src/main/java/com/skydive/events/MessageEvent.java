@@ -1,6 +1,6 @@
-package com.skydive.java.events;
+package com.skydive.events;
 
-import com.skydive.java.CommMessage;
+import com.skydive.CommMessage;
 
 /**
  * Created by NawBar on 2016-10-12.

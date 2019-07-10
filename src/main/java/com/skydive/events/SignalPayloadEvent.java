@@ -1,7 +1,7 @@
-package com.skydive.java.events;
+package com.skydive.events;
 
-import com.skydive.java.data.SignalData;
-import com.skydive.java.data.SignalPayloadData;
+import com.skydive.data.SignalData;
+import com.skydive.data.SignalPayloadData;
 
 /**
  * Created by nawba on 15.10.2016.

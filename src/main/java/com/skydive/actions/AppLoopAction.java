@@ -1,10 +1,10 @@
-package com.skydive.java.actions;
+package com.skydive.actions;
 
-import com.skydive.java.CommHandler;
-import com.skydive.java.CommMessage;
-import com.skydive.java.data.DebugData;
-import com.skydive.java.events.CommEvent;
-import com.skydive.java.events.MessageEvent;
+import com.skydive.CommHandler;
+import com.skydive.CommMessage;
+import com.skydive.data.DebugData;
+import com.skydive.events.CommEvent;
+import com.skydive.events.MessageEvent;
 
 /**
  * Created by Bartosz Nawrot on 2016-10-14.

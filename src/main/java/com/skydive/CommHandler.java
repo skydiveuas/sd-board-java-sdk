@@ -1,12 +1,12 @@
-package com.skydive.java;
+package com.skydive;
 
-import com.skydive.java.actions.*;
-import com.skydive.java.data.ControlData;
-import com.skydive.java.data.SignalData;
-import com.skydive.java.data.SignalPayloadData;
-import com.skydive.java.events.CommEvent;
-import com.skydive.java.events.MessageEvent;
-import com.skydive.java.events.UserEvent;
+import com.skydive.actions.*;
+import com.skydive.data.ControlData;
+import com.skydive.data.SignalData;
+import com.skydive.data.SignalPayloadData;
+import com.skydive.events.CommEvent;
+import com.skydive.events.MessageEvent;
+import com.skydive.events.UserEvent;
 
 import java.io.IOException;
 import java.util.ArrayList;

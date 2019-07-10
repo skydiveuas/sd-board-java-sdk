@@ -1,12 +1,12 @@
-package com.skydive.java.actions;
+package com.skydive.actions;
 
-import com.skydive.java.CommHandler;
-import com.skydive.java.UavEvent;
-import com.skydive.java.data.DebugData;
-import com.skydive.java.data.SignalData;
-import com.skydive.java.data.SignalPayloadData;
-import com.skydive.java.events.CommEvent;
-import com.skydive.java.events.MessageEvent;
+import com.skydive.CommHandler;
+import com.skydive.UavEvent;
+import com.skydive.data.DebugData;
+import com.skydive.data.SignalData;
+import com.skydive.data.SignalPayloadData;
+import com.skydive.events.CommEvent;
+import com.skydive.events.MessageEvent;
 
 /**
  * Created by nawbar on 12.01.2017.

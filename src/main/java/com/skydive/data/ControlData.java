@@ -1,6 +1,6 @@
-package com.skydive.java.data;
+package com.skydive.data;
 
-import com.skydive.java.CommMessage;
+import com.skydive.CommMessage;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;

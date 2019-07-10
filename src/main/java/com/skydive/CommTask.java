@@ -1,4 +1,4 @@
-package com.skydive.java;
+package com.skydive;
 
 import java.util.Timer;
 import java.util.TimerTask;

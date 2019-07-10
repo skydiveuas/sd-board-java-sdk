@@ -1,16 +1,6 @@
-buildscript {
-    repositories {
-        mavenCentral()
-    }
-    dependencies {
-        classpath 'com.google.protobuf:protobuf-gradle-plugin:0.8.9'
-    }
-}
-
 apply plugin: 'java'
-apply plugin: 'com.google.protobuf'
 
-group 'com.fleetmgr'
+group 'com.skydive'
 version '1.0'
 
 sourceCompatibility = 1.8
@@ -19,48 +9,5 @@ repositories {
     mavenCentral()
 }
 
-def grpcVersion = '1.21.0'
-def protobufVersion = '3.8.0'
-
 dependencies {
-    compile "io.grpc:grpc-netty-shaded:${grpcVersion}"
-    compile "io.grpc:grpc-protobuf:${grpcVersion}"
-    compile "io.grpc:grpc-stub:${grpcVersion}"
-    compile "com.google.protobuf:protobuf-java-util:${protobufVersion}"
-
-    compile 'org.slf4j:slf4j-api:1.7.2'
-    compile 'org.cfg4j:cfg4j-core:4.4.0'
-
-    compile 'org.json:json:20180813'
-    
-    compile 'org.projectlombok:lombok:1.18.4'
-
-    testCompile 'junit:junit:4.12'
-}
-
-sourceSets {
-    main {
-        proto {
-            srcDir 'src/main/fm-client-proto'
-        }
-        java {
-            srcDirs 'src/main/grpc'
-        }
-    }
-}
-
-protobuf {
-    protoc { artifact = "com.google.protobuf:protoc:${protobufVersion}" }
-    plugins {
-        grpc { artifact = "io.grpc:protoc-gen-grpc-java:${grpcVersion}" }
-    }
-    generateProtoTasks {
-        all()*.plugins { grpc {} }
-    }
-    generatedFilesBaseDir = "$projectDir/src"
-}
-
-clean {
-    delete protobuf.generatedFilesBaseDir + "/main/grpc"
-    delete protobuf.generatedFilesBaseDir + "/main/java/com/fleetmgr/interfaces"
 }

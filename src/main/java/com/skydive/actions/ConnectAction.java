@@ -1,13 +1,13 @@
-package com.skydive.java.actions;
+package com.skydive.actions;
 
-import com.skydive.java.CommHandler;
-import com.skydive.java.CommMessage;
-import com.skydive.java.CommTask;
-import com.skydive.java.UavEvent;
-import com.skydive.java.data.CalibrationSettings;
-import com.skydive.java.data.SignalData;
-import com.skydive.java.events.CommEvent;
-import com.skydive.java.events.SignalPayloadEvent;
+import com.skydive.CommHandler;
+import com.skydive.CommMessage;
+import com.skydive.CommTask;
+import com.skydive.UavEvent;
+import com.skydive.data.CalibrationSettings;
+import com.skydive.data.SignalData;
+import com.skydive.events.CommEvent;
+import com.skydive.events.SignalPayloadEvent;
 
 import java.util.Timer;
 import java.util.TimerTask;

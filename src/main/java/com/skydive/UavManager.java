@@ -1,8 +1,8 @@
-package com.skydive.java;
+package com.skydive;
 
-import com.skydive.java.actions.CommHandlerAction;
-import com.skydive.java.data.*;
-import com.skydive.java.events.UserEvent;
+import com.skydive.actions.CommHandlerAction;
+import com.skydive.data.*;
+import com.skydive.events.UserEvent;
 
 import java.util.ArrayList;
 

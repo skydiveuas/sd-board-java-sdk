@@ -1,13 +1,13 @@
-package com.skydive.java.data;
+package com.skydive.data;
 
-import com.skydive.java.CommMessage;
+import com.skydive.CommMessage;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import static com.skydive.java.data.ControlSettings.StickMovementMode.COPTER;
+import static com.skydive.data.ControlSettings.StickMovementMode.COPTER;
 
 /**
  * Created by Bartosz Nawrot on 2016-10-14.

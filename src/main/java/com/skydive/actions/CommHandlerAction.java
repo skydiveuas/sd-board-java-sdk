@@ -1,8 +1,8 @@
-package com.skydive.java.actions;
+package com.skydive.actions;
 
-import com.skydive.java.CommHandler;
-import com.skydive.java.events.CommEvent;
-import com.skydive.java.events.UserEvent;
+import com.skydive.CommHandler;
+import com.skydive.events.CommEvent;
+import com.skydive.events.UserEvent;
 
 /**
  * Created by NawBar on 2016-10-12.

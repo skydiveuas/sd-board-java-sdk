@@ -1,9 +1,9 @@
-package com.skydive.java;
+package com.skydive;
 
-import com.skydive.java.data.*;
-import com.skydive.java.events.CommEvent;
-import com.skydive.java.events.MessageEvent;
-import com.skydive.java.events.SignalPayloadEvent;
+import com.skydive.data.*;
+import com.skydive.events.CommEvent;
+import com.skydive.events.MessageEvent;
+import com.skydive.events.SignalPayloadEvent;
 
 import java.io.IOException;
 
