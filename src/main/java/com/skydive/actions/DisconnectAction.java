@@ -24,7 +24,7 @@ public class DisconnectAction extends CommHandlerAction {
 
     @Override
     public void start() {
-        System.out.println("Starting disconnection procedure");
+        logger.info("Starting disconnection procedure");
         commHandler.stopCommTask(commHandler.getPingTask());
         commHandler.send(new SignalData(SignalData.Command.APP_LOOP, SignalData.Parameter.BREAK).getMessage());
     }

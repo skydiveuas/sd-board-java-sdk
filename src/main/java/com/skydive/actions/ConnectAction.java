@@ -63,7 +63,7 @@ public class ConnectAction extends CommHandlerAction {
 
     @Override
     public void start() {
-        System.out.println("Starting connection procedure");
+        logger.info("Starting connection procedure");
         connectionProcedureDone = false;
         state = ConnectState.INITIAL_COMMAND;
         commHandler.send(new SignalData(SignalData.Command.START_CMD, SignalData.Parameter.START).getMessage());
@@ -79,9 +79,9 @@ public class ConnectAction extends CommHandlerAction {
                         new SignalData(SignalData.Command.START_CMD, SignalData.Parameter.ACK))) {
                     commHandler.stopCommTask(connectionTimeoutTask);
                     state = ConnectState.PROTOCOL_VERSION;
-                    System.out.println("Initial command received successfully");
+                    logger.info("Initial command received successfully");
                 } else {
-                    System.out.println("Unexpected event received at state " + state.toString());
+                    logger.info("Unexpected event received at state " + state.toString());
                 }
                 break;
 
@@ -91,7 +91,7 @@ public class ConnectAction extends CommHandlerAction {
                         protocolResponse.getParameterValue() == CommMessage.PROTOCOL_VERSION) {
                     commHandler.send(new SignalData(SignalData.Command.PROTOCOL_VERSION, SignalData.Parameter.ACK).getMessage());
                     state = ConnectState.WAITING_FOR_CALIBRATION;
-                    System.out.println("Protocol setup done");
+                    logger.info("Protocol setup done");
                 } else {
                     commHandler.send(new SignalData(SignalData.Command.PROTOCOL_VERSION, SignalData.Parameter.NOT_ALLOWED).getMessage());
                     commHandler.getUavManager().notifyUavEvent(new UavEvent(UavEvent.Type.ERROR, "Unsupported protocol version"));
@@ -102,13 +102,13 @@ public class ConnectAction extends CommHandlerAction {
                 if (event.matchSignalData(
                         new SignalData(SignalData.Command.CALIBRATION_SETTINGS, SignalData.Parameter.READY))) {
                     state = ConnectState.WAITING_FOR_CALIBRATION_DATA;
-                    System.out.println("Calibration done successfully, data ready");
+                    logger.info("Calibration done successfully, data ready");
                 } else if (event.matchSignalData(
                         new SignalData(SignalData.Command.CALIBRATION_SETTINGS, SignalData.Parameter.NON_STATIC))) {
-                    System.out.println("Calibration non static");
+                    logger.info("Calibration non static");
                     commHandler.getUavManager().notifyUavEvent(new UavEvent(UavEvent.Type.CALIBRATION_NON_STATIC));
                 } else {
-                    System.out.println("Unexpected event received at state " + state.toString());
+                    logger.info("Unexpected event received at state " + state.toString());
                 }
                 break;
 
@@ -119,18 +119,18 @@ public class ConnectAction extends CommHandlerAction {
 
                     CalibrationSettings calibrationSettings = (CalibrationSettings) signalEvent.getData();
                     if (calibrationSettings.isValid()) {
-                        System.out.println("Calibration settings received after adHoc calibration");
+                        logger.info("Calibration settings received after adHoc calibration");
                         state = ConnectState.FINAL_COMMAND;
                         commHandler.send(new SignalData(SignalData.Command.CALIBRATION_SETTINGS, SignalData.Parameter.ACK).getMessage());
                         commHandler.getUavManager().setCalibrationSettings(calibrationSettings);
                         // send final start command
                         commHandler.send(new SignalData(SignalData.Command.APP_LOOP, SignalData.Parameter.START).getMessage());
                     } else {
-                        System.out.println("Calibration settings received but the data is invalid, responding with DATA_INVALID");
+                        logger.info("Calibration settings received but the data is invalid, responding with DATA_INVALID");
                         commHandler.send(new SignalData(SignalData.Command.CALIBRATION_SETTINGS, SignalData.Parameter.DATA_INVALID).getMessage());
                     }
                 } else {
-                    System.out.println("Unexpected event received at state " + state.toString());
+                    logger.info("Unexpected event received at state " + state.toString());
                 }
                 break;
 
@@ -139,10 +139,10 @@ public class ConnectAction extends CommHandlerAction {
                         new SignalData(SignalData.Command.APP_LOOP, SignalData.Parameter.ACK))) {
                     connectionProcedureDone = true;
                     state = ConnectState.IDLE;
-                    System.out.println("Final command received successfully, connection procedure done");
+                    logger.info("Final command received successfully, connection procedure done");
                     commHandler.getUavManager().notifyUavEvent(new UavEvent(UavEvent.Type.CONNECTED));
                 } else {
-                    System.out.println("Unexpected event received at state " + state.toString());
+                    logger.info("Unexpected event received at state " + state.toString());
                 }
                 break;
 
@@ -150,9 +150,9 @@ public class ConnectAction extends CommHandlerAction {
                 throw new Exception("Event: " + event.toString() + " received at unknown state");
         }
         if (actualState != state) {
-            System.out.println("HandleEvent done, transition: " + actualState.toString() + " -> " + state.toString());
+            logger.info("HandleEvent done, transition: " + actualState.toString() + " -> " + state.toString());
         } else {
-            System.out.println("HandleEvent done, no state change");
+            logger.info("HandleEvent done, no state change");
         }
     }
 

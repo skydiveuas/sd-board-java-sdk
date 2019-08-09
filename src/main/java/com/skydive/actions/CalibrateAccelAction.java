@@ -39,7 +39,7 @@ public class CalibrateAccelAction extends CommHandlerAction {
 
     @Override
     public void start() {
-        System.out.println("Starting calibration accelerometer procedure");
+        logger.info("Starting calibration accelerometer procedure");
         calibrationProcedureDone = false;
         state = CalibrationState.INITIAL_COMMAND;
         commHandler.stopCommTask(commHandler.getPingTask());
@@ -54,16 +54,16 @@ public class CalibrateAccelAction extends CommHandlerAction {
                 if (event.getType() == CommEvent.EventType.MESSAGE_RECEIVED) {
                     switch (((MessageEvent) event).getMessageType()) {
                         case CONTROL:
-                            System.out.println("DebugData received when waiting for ACK on initial calibrate accelerometer command");
+                            logger.info("DebugData received when waiting for ACK on initial calibrate accelerometer command");
                             commHandler.getUavManager().setDebugData(new DebugData(((MessageEvent) event).getMessage()));
                             break;
 
                         case SIGNAL:
                             if (event.matchSignalData(new SignalData(SignalData.Command.CALIBRATE_ACCEL, SignalData.Parameter.ACK))) {
-                                System.out.println("Accelerometer calibration starts");
+                                logger.info("Accelerometer calibration starts");
                                 state = CalibrationState.WAITING_FOR_CALIBRATION;
                             } else {
-                                System.out.println("Unexpected event received at state " + state.toString());
+                                logger.info("Unexpected event received at state " + state.toString());
                             }
                             break;
                     }
@@ -74,15 +74,15 @@ public class CalibrateAccelAction extends CommHandlerAction {
                 if (event.matchSignalData(
                         new SignalData(SignalData.Command.CALIBRATE_ACCEL, SignalData.Parameter.DONE))) {
                     state = CalibrationState.WAITING_FOR_CALIBRATION_DATA;
-                    System.out.println("Calibration done successfully, data ready");
+                    logger.info("Calibration done successfully, data ready");
                 } else if (event.matchSignalData(
                         new SignalData(SignalData.Command.CALIBRATE_ACCEL, SignalData.Parameter.NON_STATIC))) {
-                    System.out.println("Calibration non static");
+                    logger.info("Calibration non static");
                     commHandler.getUavManager().notifyUavEvent(new UavEvent(UavEvent.Type.MESSAGE, "Accelerometer calibration non static!"));
                     calibrationProcedureDone = true;
                     commHandler.notifyActionDone();
                 } else {
-                    System.out.println("Unexpected event received at state " + state.toString());
+                    logger.info("Unexpected event received at state " + state.toString());
                 }
                 break;
 
@@ -93,7 +93,7 @@ public class CalibrateAccelAction extends CommHandlerAction {
 
                     CalibrationSettings calibrationSettings = (CalibrationSettings) signalEvent.getData();
                     if (calibrationSettings.isValid()) {
-                        System.out.println("Calibration settings received after accelerometer calibration");
+                        logger.info("Calibration settings received after accelerometer calibration");
                         commHandler.send(new SignalData(SignalData.Command.CALIBRATION_SETTINGS, SignalData.Parameter.ACK).getMessage());
                         commHandler.getUavManager().setCalibrationSettings(calibrationSettings);
                         commHandler.getUavManager().notifyUavEvent(new UavEvent(UavEvent.Type.MESSAGE, "Accelerometer calibration successful"));
@@ -101,11 +101,11 @@ public class CalibrateAccelAction extends CommHandlerAction {
                         commHandler.notifyActionDone();
                         commHandler.getUavManager().notifyUavEvent(new UavEvent((UavEvent.Type.ACCEL_CALIB_DONE)));
                     } else {
-                        System.out.println("Calibration settings received but the data is invalid, responding with DATA_INVALID");
+                        logger.info("Calibration settings received but the data is invalid, responding with DATA_INVALID");
                         commHandler.send(new SignalData(SignalData.Command.CALIBRATION_SETTINGS, SignalData.Parameter.DATA_INVALID).getMessage());
                     }
                 } else {
-                    System.out.println("Unexpected event received at state " + state.toString());
+                    logger.info("Unexpected event received at state " + state.toString());
                 }
                 break;
 
@@ -113,9 +113,9 @@ public class CalibrateAccelAction extends CommHandlerAction {
                 throw new Exception("Event: " + event.toString() + " received at unknown state");
         }
         if (actualState != state) {
-            System.out.println("HandleEvent done, transition: " + actualState.toString() + " -> " + state.toString());
+            logger.info("HandleEvent done, transition: " + actualState.toString() + " -> " + state.toString());
         } else {
-            System.out.println("HandleEvent done, no state change");
+            logger.info("HandleEvent done, no state change");
         }
     }
 

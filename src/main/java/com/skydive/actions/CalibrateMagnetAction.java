@@ -43,7 +43,7 @@ public class CalibrateMagnetAction extends CommHandlerAction {
 
     @Override
     public void start() {
-        System.out.println("Starting magnetometer calibration procedure");
+        logger.info("Starting magnetometer calibration procedure");
         calibrationProcedureDone = false;
         state = CalibrationState.INITIAL_COMMAND;
         commHandler.stopCommTask(commHandler.getPingTask());
@@ -58,17 +58,17 @@ public class CalibrateMagnetAction extends CommHandlerAction {
                 if (event.getType() == CommEvent.EventType.MESSAGE_RECEIVED) {
                     switch (((MessageEvent) event).getMessageType()) {
                         case CONTROL:
-                            System.out.println("DebugData received when waiting for ACK on initial calibrate magnetometer command");
+                            logger.info("DebugData received when waiting for ACK on initial calibrate magnetometer command");
                             commHandler.getUavManager().setDebugData(new DebugData(((MessageEvent) event).getMessage()));
                             break;
 
                         case SIGNAL:
                             if (event.matchSignalData(new SignalData(SignalData.Command.CALIBRATE_MAGNET, SignalData.Parameter.ACK))) {
-                                System.out.println("Magnetometer calibration starts");
+                                logger.info("Magnetometer calibration starts");
                                 state = CalibrationState.WAITING_FOR_USER_COMMAND;
                                 commHandler.getUavManager().notifyUavEvent(new UavEvent(UavEvent.Type.MAGNETOMETER_CALIBRATION_STARTED));
                             } else {
-                                System.out.println("Unexpected event received at state " + state.toString());
+                                logger.info("Unexpected event received at state " + state.toString());
                             }
                             break;
                     }
@@ -76,7 +76,7 @@ public class CalibrateMagnetAction extends CommHandlerAction {
                 break;
 
             case WAITING_FOR_USER_COMMAND:
-                System.out.println("Unexpected comm event received at state " + state.toString());
+                logger.info("Unexpected comm event received at state " + state.toString());
                 break;
 
             case WAITING_FOR_CALIBRATION:
@@ -89,7 +89,7 @@ public class CalibrateMagnetAction extends CommHandlerAction {
                     commHandler.notifyActionDone();
 
                 } else {
-                    System.out.println("Unexpected event received at state " + state.toString());
+                    logger.info("Unexpected event received at state " + state.toString());
                 }
                 break;
 
@@ -100,7 +100,7 @@ public class CalibrateMagnetAction extends CommHandlerAction {
 
                     CalibrationSettings calibrationSettings = (CalibrationSettings) signalEvent.getData();
                     if (calibrationSettings.isValid()) {
-                        System.out.println("Calibration settings received after magnetometer calibration");
+                        logger.info("Calibration settings received after magnetometer calibration");
                         commHandler.send(new SignalData(SignalData.Command.CALIBRATION_SETTINGS, SignalData.Parameter.ACK).getMessage());
                         commHandler.getUavManager().setCalibrationSettings(calibrationSettings);
                         commHandler.getUavManager().notifyUavEvent(new UavEvent(UavEvent.Type.MESSAGE, "Magnetometer calibration successful!"));
@@ -108,7 +108,7 @@ public class CalibrateMagnetAction extends CommHandlerAction {
                         commHandler.notifyActionDone();
                     } else {
                         commHandler.getUavManager().notifyUavEvent(new UavEvent(UavEvent.Type.MESSAGE, "Magnetometer calibration failed!"));
-                        System.out.println("Calibration settings received but the data is invalid, responding with DATA_INVALID");
+                        logger.info("Calibration settings received but the data is invalid, responding with DATA_INVALID");
                         commHandler.send(new SignalData(SignalData.Command.CALIBRATION_SETTINGS, SignalData.Parameter.DATA_INVALID).getMessage());
                         calibrationProcedureDone = true;
                         commHandler.notifyActionDone();
@@ -133,9 +133,9 @@ public class CalibrateMagnetAction extends CommHandlerAction {
                 throw new Exception("Event: " + event.toString() + " received at unknown state");
         }
         if (actualState != state) {
-            System.out.println("HandleEvent done, transition: " + actualState.toString() + " -> " + state.toString());
+            logger.info("HandleEvent done, transition: " + actualState.toString() + " -> " + state.toString());
         } else {
-            System.out.println("HandleEvent done, no state change");
+            logger.info("HandleEvent done, no state change");
         }
     }
 
@@ -151,7 +151,7 @@ public class CalibrateMagnetAction extends CommHandlerAction {
                 state = CalibrationState.WAITING_FOR_CANCEL_ACK;
             }
         } else {
-            System.out.println("Unexpected user event received at state " + state.toString());
+            logger.info("Unexpected user event received at state " + state.toString());
         }
     }
 

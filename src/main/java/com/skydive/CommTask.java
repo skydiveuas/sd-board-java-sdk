@@ -1,5 +1,8 @@
 package com.skydive;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -10,6 +13,8 @@ import java.util.TimerTask;
  */
 public abstract class CommTask {
     private Timer timer;
+
+    private static Logger logger = LoggerFactory.getLogger(CommTask.class);
 
     // frequency of task [Hz]
     private double frequency;
@@ -26,7 +31,6 @@ public abstract class CommTask {
     }
 
     private void start(double freq) {
-        System.out.println("Starting task: " + getTaskName() + " with freq: " + String.valueOf(freq) + "Hz");
         timer = new Timer(getTaskName() + "_timer");
         TimerTask timerTask = new TimerTask() {
             @Override
@@ -36,14 +40,14 @@ public abstract class CommTask {
         };
         long period = (long) ((1.0 / freq) * 1000);
         long delay = period > 200 ? period : 200;
-        System.out.println("Starting " + getTaskName() + " task with freq: " + String.valueOf(freq) + " Hz, and delay: " + String.valueOf(delay) + " ms");
+        logger.info("Starting {} task with freq: {} Hz, and delay: {} ms", getTaskName(), freq, delay);
         timer.scheduleAtFixedRate(timerTask, delay, period);
         isRunning = true;
         onStarted();
     }
 
     public void stop() {
-        System.out.println("Stopping task: " + getTaskName());
+        logger.info("Stopping task: " + getTaskName());
         if (timer != null) {
             timer.cancel();
         }

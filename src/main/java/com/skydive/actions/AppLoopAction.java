@@ -27,7 +27,7 @@ public class AppLoopAction extends CommHandlerAction {
 
     @Override
     public void start() {
-        System.out.println("AppLoopAction: Starting app loop handling mode");
+        logger.info("AppLoopAction: Starting app loop handling mode");
         commHandler.startCommTask(commHandler.getPingTask());
     }
 
@@ -40,7 +40,7 @@ public class AppLoopAction extends CommHandlerAction {
                 // debug data received
                 commHandler.getUavManager().setDebugData(new DebugData(messageEvent.getMessage()));
             } else {
-                System.out.println("AppLoopAction: Unexpected massage received: " + messageEvent.toString());
+                logger.info("AppLoopAction: Unexpected massage received: " + messageEvent.toString());
             }
         }
     }

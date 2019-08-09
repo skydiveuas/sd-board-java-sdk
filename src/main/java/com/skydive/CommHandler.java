@@ -7,6 +7,8 @@ import com.skydive.data.SignalPayloadData;
 import com.skydive.events.CommEvent;
 import com.skydive.events.MessageEvent;
 import com.skydive.events.UserEvent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -17,6 +19,8 @@ import java.util.List;
  */
 public class CommHandler implements CommInterface.CommInterfaceListener,
         CommDispatcher.CommDispatcherListener {
+
+    private static Logger logger = LoggerFactory.getLogger(CommHandler.class);
 
     private CommHandlerAction commHandlerAction;
     private CommInterface commInterface;
@@ -49,7 +53,7 @@ public class CommHandler implements CommInterface.CommInterfaceListener,
                 if (((FlightLoopAction) commHandlerAction).isBreaking()) {
                     controlData.setStopCommand();
                 }
-                //System.out.println("Controlling: " + controlData);
+                logger.debug("Controlling: " + controlData);
                 send(controlData.getMessage());
             }
         };
@@ -62,7 +66,7 @@ public class CommHandler implements CommInterface.CommInterfaceListener,
 
             @Override
             protected void task() {
-                System.out.println("CommHandler: Pinging...");
+                logger.debug("Pinging...");
                 switch (state) {
                     case CONFIRMED:
                         sentPing = new SignalData(SignalData.Command.PING_VALUE, (int) (Math.random() * 1000000000));
@@ -71,7 +75,7 @@ public class CommHandler implements CommInterface.CommInterfaceListener,
                         break;
 
                     case WAITING:
-                        System.out.println("CommHandler: Ping receiving timeout");
+                        logger.info("Ping receiving timeout");
                         state = PingTaskState.CONFIRMED;
                         break;
                 }
@@ -80,14 +84,14 @@ public class CommHandler implements CommInterface.CommInterfaceListener,
     }
 
     public void connect(CommInterface commInterface) {
-        System.out.println("CommHandler: connect over: " + commInterface.getClass().getSimpleName());
+        logger.info("CommHandler: connect over: " + commInterface.getClass().getSimpleName());
         this.commInterface = commInterface;
         this.commInterface.setListener(this);
         this.commInterface.connect();
     }
 
     void disconnectInterface() {
-        System.out.println("CommHandler: disconnectInterface");
+        logger.info("CommHandler: disconnectInterface");
         stopAllTasks();
         commInterface.disconnect();
     }
@@ -120,7 +124,7 @@ public class CommHandler implements CommInterface.CommInterfaceListener,
 
     @Override
     public void handleCommEvent(CommEvent event) {
-        //System.out.println("CommHandler: Event " + event.toString() + " received at action " + commHandlerAction.toString());
+        logger.debug("CommHandler: Event " + event.toString() + " received at action " + commHandlerAction.toString());
         switch (event.getType()) {
             case MESSAGE_RECEIVED:
                 if (((MessageEvent) event).getMessageType() == CommMessage.MessageType.SIGNAL) {
@@ -136,7 +140,7 @@ public class CommHandler implements CommInterface.CommInterfaceListener,
         try {
             commHandlerAction.handleEvent(event);
         } catch (Exception e) {
-            System.out.println(e.toString());
+            logger.info(e.toString());
         }
     }
 
@@ -149,7 +153,7 @@ public class CommHandler implements CommInterface.CommInterfaceListener,
     }
 
     public void send(CommMessage message) {
-        //System.out.println("CommHandler: Sending message: " + message.toString());
+        logger.debug("Sending message: " + message.toString());
         byte[] array = message.getByteArray();
         commInterface.send(array, array.length);
     }
@@ -161,7 +165,7 @@ public class CommHandler implements CommInterface.CommInterfaceListener,
     }
 
     public void notifyActionDone() {
-        System.out.println("CommHandler: notifyActionDone");
+        logger.info("NotifyActionDone");
         try {
             preformAction(CommHandlerAction.ActionType.APPLICATION_LOOP);
         } catch (Exception e) {
@@ -195,7 +199,7 @@ public class CommHandler implements CommInterface.CommInterfaceListener,
                 return new UploadRouteContainerAction(this, data);
 
             default:
-                throw new Exception("CommHandler: Unsupported action type");
+                throw new Exception("Unsupported action type");
         }
     }
 
@@ -206,20 +210,20 @@ public class CommHandler implements CommInterface.CommInterfaceListener,
 
     @Override
     public void onError(IOException e) {
-        System.out.println("CommHandler: onError: " + e.getMessage());
+        logger.info("onError: " + e.getMessage());
         uavManager.notifyUavEvent(new UavEvent(UavEvent.Type.ERROR, e.getMessage()));
         uavManager.notifyUavEvent(new UavEvent(UavEvent.Type.DISCONNECTED));
     }
 
     @Override
     public void onDisconnected() {
-        System.out.println("CommHandler: onDisconnected");
+        logger.info("onDisconnected");
         commHandlerAction = new IdleAction(this);
     }
 
     @Override
     public void onConnected() {
-        System.out.println("CommHandler: onConnected");
+        logger.info("onConnected");
         try {
             preformAction(CommHandlerAction.ActionType.CONNECT);
         } catch (Exception e) {
@@ -239,7 +243,7 @@ public class CommHandler implements CommInterface.CommInterfaceListener,
             state = PingTaskState.CONFIRMED;
             return (System.currentTimeMillis() - timestamp) / 2;
         } else {
-            System.out.println("CommHandler: Pong key does not match to the ping key!");
+            logger.warn("Pong key does not match to the ping key!");
             return 0;
         }
     }
@@ -264,7 +268,7 @@ public class CommHandler implements CommInterface.CommInterfaceListener,
     }
 
     private void stopAllTasks() {
-        System.out.println("CommHandler: stopAllTasks");
+        logger.info("StopAllTasks");
         for (CommTask task : runningTasks) {
             stopCommTask(task);
         }

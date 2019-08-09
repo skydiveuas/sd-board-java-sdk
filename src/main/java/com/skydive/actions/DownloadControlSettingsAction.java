@@ -33,7 +33,7 @@ public class DownloadControlSettingsAction extends CommHandlerAction {
 
     @Override
     public void start() {
-        System.out.println("Starting download control settings procedre");
+        logger.info("Starting download control settings procedre");
         state = DownloadState.INITIAL_COMMAND;
         commHandler.stopCommTask(commHandler.getPingTask());
         commHandler.send(new SignalData(SignalData.Command.DOWNLOAD_SETTINGS, SignalData.Parameter.START).getMessage());
@@ -52,16 +52,16 @@ public class DownloadControlSettingsAction extends CommHandlerAction {
                 if (event.getType() == CommEvent.EventType.MESSAGE_RECEIVED) {
                     switch (((MessageEvent) event).getMessageType()) {
                         case CONTROL:
-                            System.out.println("DebugData received when waiting for ACK on initial download control settings command");
+                            logger.info("DebugData received when waiting for ACK on initial download control settings command");
                             commHandler.getUavManager().setDebugData(new DebugData(((MessageEvent) event).getMessage()));
                             break;
 
                         case SIGNAL:
                             if (event.matchSignalData(new SignalData(SignalData.Command.DOWNLOAD_SETTINGS, SignalData.Parameter.ACK))) {
-                                System.out.println("Downloading control settings starts");
+                                logger.info("Downloading control settings starts");
                                 state = DownloadState.WAITING_FOR_CONTROL_SETTINGS_DATA;
                             } else {
-                                System.out.println("Unexpected event received at state " + state.toString());
+                                logger.info("Unexpected event received at state " + state.toString());
                             }
                             break;
                     }
@@ -75,17 +75,17 @@ public class DownloadControlSettingsAction extends CommHandlerAction {
 
                     ControlSettings controlSettings = (ControlSettings) signalEvent.getData();
                     if (controlSettings.isValid()) {
-                        System.out.println("Control settings received");
+                        logger.info("Control settings received");
                         commHandler.send(new SignalData(SignalData.Command.CONTROL_SETTINGS, SignalData.Parameter.ACK).getMessage());
                         commHandler.getUavManager().setControlSettings(controlSettings);
                         downloadProcedureDone = true;
                         commHandler.notifyActionDone();
                     } else {
-                        System.out.println("Control settings received but the data is invalid, responding with DATA_INVALID");
+                        logger.info("Control settings received but the data is invalid, responding with DATA_INVALID");
                         commHandler.send(new SignalData(SignalData.Command.CONTROL_SETTINGS, SignalData.Parameter.DATA_INVALID).getMessage());
                     }
                 } else {
-                    System.out.println("Unexpected event received at state " + state.toString());
+                    logger.info("Unexpected event received at state " + state.toString());
                 }
                 break;
 
@@ -93,9 +93,9 @@ public class DownloadControlSettingsAction extends CommHandlerAction {
                 throw new Exception("Event: " + event.toString() + " received at unknown state");
         }
         if (actualState != state) {
-            System.out.println("HandleEvent done, transition: " + actualState.toString() + " -> " + state.toString());
+            logger.info("HandleEvent done, transition: " + actualState.toString() + " -> " + state.toString());
         } else {
-            System.out.println("HandleEvent done, no state change");
+            logger.info("HandleEvent done, no state change");
         }
     }
 

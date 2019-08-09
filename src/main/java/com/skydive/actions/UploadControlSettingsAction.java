@@ -36,7 +36,7 @@ public class UploadControlSettingsAction extends CommHandlerAction {
 
     @Override
     public void start() {
-        System.out.println("Starting upload control settings procedure");
+        logger.info("Starting upload control settings procedure");
         state = UploadState.INITIAL_COMAND;
         commHandler.stopCommTask(commHandler.getPingTask());
         commHandler.send(new SignalData(SignalData.Command.UPLOAD_SETTINGS, SignalData.Parameter.START).getMessage());
@@ -56,17 +56,17 @@ public class UploadControlSettingsAction extends CommHandlerAction {
                 if (event.getType() == CommEvent.EventType.MESSAGE_RECEIVED) {
                     switch (((MessageEvent) event).getMessageType()) {
                         case CONTROL:
-                            System.out.println("DebugData received when waiting for ACK on initial upload control settings command");
+                            logger.info("DebugData received when waiting for ACK on initial upload control settings command");
                             commHandler.getUavManager().setDebugData(new DebugData(((MessageEvent) event).getMessage()));
                             break;
 
                         case SIGNAL:
                             if (event.matchSignalData(new SignalData(SignalData.Command.UPLOAD_SETTINGS, SignalData.Parameter.ACK))) {
-                                System.out.println("Uploading control settings starts");
+                                logger.info("Uploading control settings starts");
                                 commHandler.send(controlSettingsToUpload);
                                 state = UploadState.WAITING_FOR_ACK;
                             } else {
-                                System.out.println("Unexpected event received at state " + state.toString());
+                                logger.info("Unexpected event received at state " + state.toString());
                             }
                             break;
                     }
@@ -75,16 +75,16 @@ public class UploadControlSettingsAction extends CommHandlerAction {
 
             case WAITING_FOR_ACK:
                 if (event.matchSignalData(new SignalData(SignalData.Command.CONTROL_SETTINGS, SignalData.Parameter.ACK))) {
-                    System.out.println("Control settings uploaded");
+                    logger.info("Control settings uploaded");
                     commHandler.getUavManager().notifyUavEvent(new UavEvent(UavEvent.Type.MESSAGE, "Control settings uploaded successfully!"));
                     uploadProcedureDone = true;
                     commHandler.notifyActionDone();
                 } else if (event.matchSignalData(new SignalData(SignalData.Command.CONTROL_SETTINGS, SignalData.Parameter.DATA_INVALID))
                         || event.matchSignalData(new SignalData(SignalData.Command.CONTROL_SETTINGS, SignalData.Parameter.TIMEOUT))) {
-                    System.out.println("Uploading Control Settings failed!");
+                    logger.info("Uploading Control Settings failed!");
                     commHandler.send(controlSettingsToUpload);
                 } else {
-                    System.out.println("Unexpected event received at state " + state.toString());
+                    logger.info("Unexpected event received at state " + state.toString());
                 }
                 break;
 
@@ -92,9 +92,9 @@ public class UploadControlSettingsAction extends CommHandlerAction {
                 throw new Exception("Event: " + event.toString() + " received at unknown state");
         }
         if (actualState != state) {
-            System.out.println("HandleEvent done, transition: " + actualState.toString() + " -> " + state.toString());
+            logger.info("HandleEvent done, transition: " + actualState.toString() + " -> " + state.toString());
         } else {
-            System.out.println("HandleEvent done, no state change");
+            logger.info("HandleEvent done, no state change");
         }
 
     }

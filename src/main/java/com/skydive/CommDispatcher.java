@@ -4,11 +4,15 @@ import com.skydive.data.*;
 import com.skydive.events.CommEvent;
 import com.skydive.events.MessageEvent;
 import com.skydive.events.SignalPayloadEvent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Created by nawba on 16.10.2016.
  */
 public class CommDispatcher {
+
+    private static Logger logger = LoggerFactory.getLogger(CommDispatcher.class);
 
     private byte[] preambleBuffer;
     private byte[] dataBuffer;
@@ -70,7 +74,7 @@ public class CommDispatcher {
         final CommMessage.MessageType newPreamble = updatePreamble(b);
         if (newPreamble != CommMessage.MessageType.EMPTY) {
             if (isPreambleActive) {
-                System.out.println("SkyDive::CommDispatcher::FAIL: new preamble " +
+                logger.info("SkyDive::CommDispatcher::FAIL: new preamble " +
                         "received when previous reception not ready");
                 failedReceptionCounter++;
             }
@@ -108,7 +112,7 @@ public class CommDispatcher {
                         }
                     } else {
                         if (receivingSignalData) {
-                            System.out.println("SkyDive::CommDispatcher::FAIL: receiving SignalData not ready");
+                            logger.info("SkyDive::CommDispatcher::FAIL: receiving SignalData not ready");
                             failedReceptionCounter++;
                         }
                         receivingSignalData = false;
@@ -118,7 +122,7 @@ public class CommDispatcher {
                     }
                 } else {
                     // something gone wrong, reset processor
-                    System.out.println("SkyDive::CommDispatcher::FAIL: wrong CRC");
+                    logger.info("SkyDive::CommDispatcher::FAIL: wrong CRC");
                     failedReceptionCounter++;
                 }
                 deactivatePreamble();

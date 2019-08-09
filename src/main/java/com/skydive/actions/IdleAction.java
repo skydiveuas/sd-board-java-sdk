@@ -21,12 +21,12 @@ public class IdleAction extends CommHandlerAction {
 
     @Override
     public void start() {
-        System.out.println("Starting IDLE action - no action");
+        logger.info("Starting IDLE action - no action");
     }
 
     @Override
     public void handleEvent(CommEvent event) {
-        System.out.println("Idle action drops event");
+        logger.info("Idle action drops event");
     }
 
     @Override

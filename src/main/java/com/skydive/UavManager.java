@@ -3,6 +3,8 @@ package com.skydive;
 import com.skydive.actions.CommHandlerAction;
 import com.skydive.data.*;
 import com.skydive.events.UserEvent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 
@@ -14,6 +16,8 @@ import java.util.ArrayList;
  * to all listeners.
  */
 public class UavManager {
+
+    private static Logger logger = LoggerFactory.getLogger(UavManager.class);
 
     private ArrayList<UavManagerListener> listeners;
 
@@ -164,7 +168,7 @@ public class UavManager {
         try {
             commHandler.preformAction(actionType);
         } catch (Exception e) {
-            System.out.println("UavManager exception: " + e.toString());
+            logger.info("UavManager exception: " + e.toString());
             e.printStackTrace();
             notifyUavEvent(new UavEvent(UavEvent.Type.ERROR, e.getMessage()));
         }
@@ -174,7 +178,7 @@ public class UavManager {
         try {
             commHandler.preformActionUpload(actionType, dataToUpload);
         } catch (Exception e) {
-            System.out.println("UavManager exception: " + e.toString());
+            logger.info("UavManager exception: " + e.toString());
             e.printStackTrace();
             notifyUavEvent(new UavEvent(UavEvent.Type.ERROR, e.getMessage()));
         }
@@ -184,7 +188,7 @@ public class UavManager {
         try {
             updateCommState(event);
         } catch (Exception e) {
-            System.out.println("UavManager update comm state error: " + e.getMessage());
+            logger.info("UavManager update comm state error: " + e.getMessage());
         }
         for (UavManagerListener listener : listeners) {
             listener.handleUavEvent(event, this);
@@ -230,7 +234,7 @@ public class UavManager {
     }
 
     public void setCommDelay(long commDelay) {
-        System.out.println("Ping delay updated: " + String.valueOf(commDelay) + " ms");
+        logger.debug("Ping delay updated: {} ms", commDelay);
         this.commDelay = commDelay;
         notifyUavEvent(new UavEvent(UavEvent.Type.PING_UPDATED));
     }

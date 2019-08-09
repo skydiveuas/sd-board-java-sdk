@@ -48,15 +48,15 @@ public class DownloadRouteContainerAction extends CommHandlerAction {
                 if (event.getType() == CommEvent.EventType.MESSAGE_RECEIVED) {
                     switch (((MessageEvent) event).getMessageType()) {
                         case CONTROL:
-                            System.out.println("DebugData received when waiting for ACK on RouteContainer download procedure");
+                            logger.info("DebugData received when waiting for ACK on RouteContainer download procedure");
                             commHandler.getUavManager().setDebugData(new DebugData(((MessageEvent) event).getMessage()));
                             break;
                         case SIGNAL:
                             if (event.matchSignalData(new SignalData(SignalData.Command.DOWNLOAD_ROUTE, SignalData.Parameter.ACK))) {
-                                System.out.println("Starting Route Container upload procedure");
+                                logger.info("Starting Route Container upload procedure");
                                 state = DownloadState.DOWNLOADING_DATA;
                             } else {
-                                System.out.println("Unexpected event received at state " + state.toString());
+                                logger.info("Unexpected event received at state " + state.toString());
                             }
                             break;
                     }
@@ -70,19 +70,19 @@ public class DownloadRouteContainerAction extends CommHandlerAction {
                     RouteContainer routeContainer = (RouteContainer) signalEvent.getData();
 
                     if (routeContainer.isValid()) {
-                        System.out.println("Route Container settings received");
+                        logger.info("Route Container settings received");
                         commHandler.send(new SignalData(SignalData.Command.DOWNLOAD_SETTINGS, SignalData.Parameter.ACK).getMessage());
                         commHandler.getUavManager().setRouteContainer(routeContainer);
                         commHandler.getUavManager().notifyUavEvent(new UavEvent(UavEvent.Type.MESSAGE, "Route Container settings downloaded successfully!"));
                         commHandler.notifyActionDone();
                     } else {
                         commHandler.getUavManager().notifyUavEvent(new UavEvent(UavEvent.Type.MESSAGE, "Downloading Route Container settings failed!"));
-                        System.out.println("Route Container settings received but the data is invalid, responding with DATA_INVALID");
+                        logger.info("Route Container settings received but the data is invalid, responding with DATA_INVALID");
                         commHandler.send(new SignalData(SignalData.Command.DOWNLOAD_SETTINGS, SignalData.Parameter.DATA_INVALID).getMessage());
                         commHandler.notifyActionDone();
                     }
                 } else {
-                    System.out.println("Unexpected event received at state " + state.toString());
+                    logger.info("Unexpected event received at state " + state.toString());
                 }
 
                 break;
@@ -90,9 +90,9 @@ public class DownloadRouteContainerAction extends CommHandlerAction {
                 throw new Exception("Event: " + event.toString() + " received at at unnown state");
         }
         if (actualState != state) {
-            System.out.println("HandleEvent done, transition: " + actualState.toString() + " -> " + state.toString());
+            logger.info("HandleEvent done, transition: " + actualState.toString() + " -> " + state.toString());
         } else {
-            System.out.println("HandleEvent done, no state change");
+            logger.info("HandleEvent done, no state change");
         }
     }
 

@@ -4,6 +4,8 @@ import com.skydive.data.*;
 import com.skydive.events.CommEvent;
 import com.skydive.events.MessageEvent;
 import com.skydive.events.SignalPayloadEvent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
@@ -12,6 +14,8 @@ import java.io.IOException;
  */
 public class UavSimulator implements CommInterface.CommInterfaceListener,
         CommDispatcher.CommDispatcherListener {
+
+    private static Logger logger = LoggerFactory.getLogger(UavSimulator.class);
 
     private CommInterface commInterface;
     private CommDispatcher dispatcher;
@@ -75,7 +79,7 @@ public class UavSimulator implements CommInterface.CommInterfaceListener,
     @Override
     public void handleCommEvent(CommEvent event) {
         try {
-            //System.out.println("UavSimulator : handling event : " + event.toString() + " @ " + state.toString());
+            logger.debug("UavSimulator : handling event : " + event.toString() + " @ " + state.toString());
             switch (state) {
                 case CONNECTING_APP_LOOP:
                     handleEventConnectingAppLoop(event);
@@ -105,26 +109,26 @@ public class UavSimulator implements CommInterface.CommInterfaceListener,
                     handleEventDownloadRouteContainer(event);
                     break;
                 default:
-                    System.out.println("Error state!");
+                    logger.info("Error state!");
             }
         } catch (Exception e) {
-            System.out.println("Error while handling event! " + e.getMessage());
+            logger.info("Error while handling event! " + e.getMessage());
             e.printStackTrace();
         }
     }
 
     private void handleEventConnectingAppLoop(CommEvent event) throws Exception {
-        System.out.println("Connecting app loop @ " + connectionStage.toString());
-        System.out.println("DDDD: " + event.getSignalData().toString());
+        logger.info("Connecting app loop @ " + connectionStage.toString());
+        logger.info("DDDD: " + event.getSignalData().toString());
         switch (connectionStage) {
             case INITIAL_COMMAND:
                 if (event.matchSignalData(new SignalData(SignalData.Command.START_CMD, SignalData.Parameter.START))) {
-                    System.out.println("Start command received, negotiation protocol version");
+                    logger.info("Start command received, negotiation protocol version");
                     send(new SignalData(SignalData.Command.START_CMD, SignalData.Parameter.ACK).getMessage());
                     send(new SignalData(SignalData.Command.PROTOCOL_VERSION_VALUE, CommMessage.PROTOCOL_VERSION).getMessage());
                     connectionStage = ConnectionStage.PROTOCOL_VERSION_ACK;
                 } else if (event.matchSignalData(new SignalData(SignalData.Command.WHO_AM_I_VALUE, SignalData.Parameter.START))) {
-                    System.out.println("Who am I procedure started, responding with board type");
+                    logger.info("Who am I procedure started, responding with board type");
                     send(new SignalData(SignalData.Command.WHO_AM_I_VALUE, calibrationSettings.getBoardType().getValue()).getMessage());
                     // connection shutdown, wait for message to be delivered to application
                     Thread.sleep(500);
@@ -136,7 +140,7 @@ public class UavSimulator implements CommInterface.CommInterfaceListener,
 
             case PROTOCOL_VERSION_ACK:
                 if (event.matchSignalData(new SignalData(SignalData.Command.PROTOCOL_VERSION, SignalData.Parameter.ACK))) {
-                    System.out.println("Protocol version accepted, staring calibration procedure");
+                    logger.info("Protocol version accepted, staring calibration procedure");
                     send(new SignalData(SignalData.Command.START_CMD, SignalData.Parameter.ACK).getMessage());
                     // simulate calibration process (sleep 0.5s)
                     Thread.sleep(500);
@@ -150,7 +154,7 @@ public class UavSimulator implements CommInterface.CommInterfaceListener,
 
             case CALIBRATION_ACK:
                 if (handleSignalPayloadAck(calibrationSettings, event)) {
-                    System.out.println("Calibration procedure done successfully, waiting for final command");
+                    logger.info("Calibration procedure done successfully, waiting for final command");
                     connectionStage = ConnectionStage.FINAL_COMMAND;
                 } else {
                     throw new Exception("Unexpected message received");
@@ -159,7 +163,7 @@ public class UavSimulator implements CommInterface.CommInterfaceListener,
 
             case FINAL_COMMAND:
                 if (event.matchSignalData(new SignalData(SignalData.Command.APP_LOOP, SignalData.Parameter.START))) {
-                    System.out.println("ApplicationLoop started");
+                    logger.info("ApplicationLoop started");
                     state = State.APP_LOOP;
                     send(new SignalData(SignalData.Command.APP_LOOP, SignalData.Parameter.ACK).getMessage());
                     debugTask.start();
@@ -184,12 +188,12 @@ public class UavSimulator implements CommInterface.CommInterfaceListener,
             if (msg.getType() == CommMessage.MessageType.SIGNAL) {
                 SignalData signalMsg = new SignalData(msg);
                 if (signalMsg.getCommand() == SignalData.Command.PING_VALUE) {
-                    System.out.println("Ping message received, responding with pong");
+                    logger.info("Ping message received, responding with pong");
                     send(new SignalData(SignalData.Command.PING_VALUE, signalMsg.getParameterValue()).getMessage());
 
                 } else if (event.matchSignalData(new SignalData(
                         SignalData.Command.APP_LOOP, SignalData.Parameter.BREAK))) {
-                    System.out.println("Disconnect message received, leaving app loop and disconnecting");
+                    logger.info("Disconnect message received, leaving app loop and disconnecting");
                     debugTask.stop();
                     send(new SignalData(SignalData.Command.APP_LOOP, SignalData.Parameter.BREAK_ACK).getMessage());
                     // wait for message to be delivered to application
@@ -198,7 +202,7 @@ public class UavSimulator implements CommInterface.CommInterfaceListener,
 
                 } else if (event.matchSignalData(new SignalData(
                         SignalData.Command.FLIGHT_LOOP, SignalData.Parameter.START))) {
-                    System.out.println("FlightLoop initiated");
+                    logger.info("FlightLoop initiated");
                     debugTask.stop();
                     state = State.FLIGHT_LOOP;
                     flightLoopStage = FlightLoopStage.CONTROLS_ACK;
@@ -207,7 +211,7 @@ public class UavSimulator implements CommInterface.CommInterfaceListener,
 
                 } else if (event.matchSignalData(new SignalData(
                         SignalData.Command.CALIBRATE_ACCEL, SignalData.Parameter.START))) {
-                    System.out.println("Starting accelerometer calibration procedure");
+                    logger.info("Starting accelerometer calibration procedure");
                     debugTask.stop();
                     state = State.CALIBRATE_ACCEL;
                     send(new SignalData(SignalData.Command.CALIBRATE_ACCEL, SignalData.Parameter.ACK).getMessage());
@@ -218,7 +222,7 @@ public class UavSimulator implements CommInterface.CommInterfaceListener,
 
                 } else if (event.matchSignalData(new SignalData(
                         SignalData.Command.CALIBRATE_MAGNET, SignalData.Parameter.START))) {
-                    System.out.println("Starting magnetometer calibration procedure");
+                    logger.info("Starting magnetometer calibration procedure");
                     debugTask.stop();
                     state = State.CALIBRATE_MAGNET;
                     magnetometerState = MagnetometerStage.USER_COMMAND;
@@ -226,7 +230,7 @@ public class UavSimulator implements CommInterface.CommInterfaceListener,
 
                 } else if (event.matchSignalData(new SignalData(
                         SignalData.Command.UPLOAD_SETTINGS, SignalData.Parameter.START))) {
-                    System.out.println("Uploading ControlSettings");
+                    logger.info("Uploading ControlSettings");
                     uploadFails = 0;
                     state = State.UPLOAD_CONTROL_SETTINGS;
                     debugTask.stop();
@@ -234,7 +238,7 @@ public class UavSimulator implements CommInterface.CommInterfaceListener,
 
                 } else if (event.matchSignalData(new SignalData(
                         SignalData.Command.DOWNLOAD_SETTINGS, SignalData.Parameter.START))) {
-                    System.out.println("ControlSettings download, sending to client");
+                    logger.info("ControlSettings download, sending to client");
                     state = State.DOWNLOAD_CONTROL_SETTINGS;
                     debugTask.stop();
                     send(new SignalData(SignalData.Command.DOWNLOAD_SETTINGS, SignalData.Parameter.ACK).getMessage());
@@ -242,7 +246,7 @@ public class UavSimulator implements CommInterface.CommInterfaceListener,
 
                 } else if (event.matchSignalData(new SignalData(
                         SignalData.Command.UPLOAD_ROUTE, SignalData.Parameter.START))) {
-                    System.out.println("Starting RouteContainer upload procedure");
+                    logger.info("Starting RouteContainer upload procedure");
                     uploadRouteFails = 0;
                     state = State.UPLOAD_ROUTE_CONTAINER;
                     debugTask.stop();
@@ -250,7 +254,7 @@ public class UavSimulator implements CommInterface.CommInterfaceListener,
 
                 } else if (event.matchSignalData(new SignalData(
                         SignalData.Command.DOWNLOAD_ROUTE, SignalData.Parameter.START))) {
-                    System.out.println("RouteContainer download, sending to client");
+                    logger.info("RouteContainer download, sending to client");
                     state = State.DOWNLOAD_ROUTE_CONTAINER;
                     debugTask.stop();
                     send(new SignalData(SignalData.Command.DOWNLOAD_ROUTE, SignalData.Parameter.ACK).getMessage());
@@ -258,12 +262,12 @@ public class UavSimulator implements CommInterface.CommInterfaceListener,
 
                 } else if ((event.matchSignalData(new SignalData(
                         SignalData.Command.SOFTWARE_UPGRADE, SignalData.Parameter.START)))) {
-                    System.out.println("Trying upgrade, not available in simulator mode!");
+                    logger.info("Trying upgrade, not available in simulator mode!");
                     send(new SignalData(SignalData.Command.SOFTWARE_UPGRADE, SignalData.Parameter.NOT_ALLOWED).getMessage());
 
                 } else if ((event.matchSignalData(new SignalData(
                         SignalData.Command.SYSTEM_RESET, SignalData.Parameter.START)))) {
-                    System.out.println("Connection broken, rest simulator!");
+                    logger.info("Connection broken, rest simulator!");
                     debugTask.stop();
                     send(new SignalData(SignalData.Command.SYSTEM_RESET, SignalData.Parameter.ACK).getMessage());
                     Thread.sleep(200);
@@ -284,7 +288,7 @@ public class UavSimulator implements CommInterface.CommInterfaceListener,
         switch (flightLoopStage) {
             case CONTROLS_ACK:
                 if (handleSignalPayloadAck(controlSettings, event)) {
-                    System.out.println("Flight ControlSettings sent successfully");
+                    logger.info("Flight ControlSettings sent successfully");
                     flightLoopStage = FlightLoopStage.ROUTE_ACK;
                     send(new SignalData(SignalData.Command.FLIGHT_LOOP, SignalData.Parameter.VIA_ROUTE_ALLOWED).getMessage());
                     startSignalPayloadSending(routeContainer);
@@ -293,14 +297,14 @@ public class UavSimulator implements CommInterface.CommInterfaceListener,
 
             case ROUTE_ACK:
                 if (handleSignalPayloadAck(routeContainer, event)) {
-                    System.out.println("Flight RouteContainer sent successfully");
+                    logger.info("Flight RouteContainer sent successfully");
                     flightLoopStage = FlightLoopStage.FINAL_COMMAND;
                 }
                 break;
 
             case FINAL_COMMAND:
                 if (event.matchSignalData(new SignalData(SignalData.Command.FLIGHT_LOOP, SignalData.Parameter.READY))) {
-                    System.out.println("FlightLoop initialization done");
+                    logger.info("FlightLoop initialization done");
                     flightLoopStage = FlightLoopStage.RUNNING;
                     debugTask.start();
                     baseSetupTask.start();
@@ -314,33 +318,33 @@ public class UavSimulator implements CommInterface.CommInterfaceListener,
                         case SIGNAL:
                             SignalData signalData = new SignalData(message);
                             if (signalData.getCommand() == SignalData.Command.PING_VALUE) {
-                                System.out.println("Ping message received, responding with pong");
+                                logger.info("Ping message received, responding with pong");
                                 send(new SignalData(SignalData.Command.PING_VALUE, signalData.getParameterValue()).getMessage());
                             }
                             break;
 
                         case AUTOPILOT:
                             AutopilotData autopilotData = new AutopilotData(message);
-                            System.out.println("AutopilotData received: " + autopilotData.toString());
+                            logger.info("AutopilotData received: " + autopilotData.toString());
                             if (autopilotData.getType() == AutopilotData.Type.TARGET ) {
                                 if (debugDataToSend.getControllerState() == DebugData.ControllerState.HOLD_POSITION) {
                                     autopilotData.setType(AutopilotData.Type.TARGET_ACK);
                                 } else {
                                     autopilotData.setType(AutopilotData.Type.TARGET_NOT_ALLOWED_STATE);
                                 }
-                                System.out.println(autopilotData.toString());
+                                logger.info(autopilotData.toString());
                                 send(autopilotData.getMessage());
                             } else if (autopilotData.getType() == AutopilotData.Type.BASE_ACK) {
-                                System.out.println("Base position confirmed");
+                                logger.info("Base position confirmed");
                             }
                             break;
 
                         case CONTROL:
                             ControlData controlData = new ControlData(message);
-                            //System.out.println("Control data received: " + controlData);
+                            logger.debug("Control data received: " + controlData);
                             updateDebugData(controlData);
                             if (controlData.getCommand() == ControlData.ControllerCommand.STOP) {
-                                System.out.println("Stop command received, leaving flight loop");
+                                logger.info("Stop command received, leaving flight loop");
                                 send(new SignalData(SignalData.Command.FLIGHT_LOOP, SignalData.Parameter.BREAK_ACK).getMessage());
                                 state = State.APP_LOOP;
                                 debugDataToSend.setControllerState(DebugData.ControllerState.APPLICATION_LOOP);
@@ -353,7 +357,7 @@ public class UavSimulator implements CommInterface.CommInterfaceListener,
 
     private void handleEventCalibrationAccelerometer(CommEvent event) throws Exception {
         if (handleSignalPayloadAck(calibrationSettings, event)) {
-            System.out.println("Accelerometer calibration procedure done successfully.");
+            logger.info("Accelerometer calibration procedure done successfully.");
             debugTask.start();
             state = State.APP_LOOP;
         }
@@ -363,26 +367,26 @@ public class UavSimulator implements CommInterface.CommInterfaceListener,
         switch (magnetometerState) {
             case USER_COMMAND:
                 if (event.matchSignalData(new SignalData(SignalData.Command.CALIBRATE_MAGNET, SignalData.Parameter.SKIP))) {
-                    System.out.println("User skips magnetometer calibration");
+                    logger.info("User skips magnetometer calibration");
                     state = State.APP_LOOP;
                     send(new SignalData(SignalData.Command.CALIBRATE_MAGNET, SignalData.Parameter.ACK).getMessage());
                     debugTask.start();
                 } else if (event.matchSignalData(new SignalData(SignalData.Command.CALIBRATE_MAGNET, SignalData.Parameter.DONE))) {
-                    System.out.println("Magnetometer calibration done");
+                    logger.info("Magnetometer calibration done");
                     // simulate calibration computation (sleep 0.5s)
                     Thread.sleep(100);
                     send(new SignalData(SignalData.Command.CALIBRATE_MAGNET, SignalData.Parameter.DONE).getMessage());
                     startSignalPayloadSending(calibrationSettings);
                     magnetometerState = MagnetometerStage.CALIBRATION_ACK;
                 } else {
-                    System.out.println("Calibration failed");
+                    logger.info("Calibration failed");
                     throw new Exception("Bad command received in magnetometer calibration");
                 }
                 break;
 
             case CALIBRATION_ACK:
                 if (handleSignalPayloadAck(calibrationSettings, event)) {
-                    System.out.println("Magnetometer calibration procedure done successfully.");
+                    logger.info("Magnetometer calibration procedure done successfully.");
                     state = State.APP_LOOP;
                     debugTask.start();
                 }
@@ -391,7 +395,7 @@ public class UavSimulator implements CommInterface.CommInterfaceListener,
     }
 
     private void handleEventUploadControlSettings(CommEvent event) throws Exception {
-        System.out.println("Starting Upload Control settings procedure...");
+        logger.info("Starting Upload Control settings procedure...");
 
         if (event.getType() == CommEvent.EventType.SIGNAL_PAYLOAD_RECEIVED
                 && ((SignalPayloadEvent) event).getDataType() == SignalData.Command.CONTROL_SETTINGS_DATA) {
@@ -402,21 +406,21 @@ public class UavSimulator implements CommInterface.CommInterfaceListener,
             if (uploadFails == 3) {
                 state = State.APP_LOOP;
                 send(new SignalData(SignalData.Command.CONTROL_SETTINGS, SignalData.Parameter.TIMEOUT).getMessage());
-                System.out.println("Upload control Settings Timeout");
+                logger.info("Upload control Settings Timeout");
                 debugTask.start();
             } else if (controlSettings.isValid()) {
                 state = State.APP_LOOP;
-                System.out.println("Control settings received");
+                logger.info("Control settings received");
                 send(new SignalData(SignalData.Command.CONTROL_SETTINGS, SignalData.Parameter.ACK).getMessage());
                 this.controlSettings = controlSettings;
                 debugTask.start();
             } else {
-                System.out.println("Control settings received but the data is invalid, responding with DATA_INVALID");
+                logger.info("Control settings received but the data is invalid, responding with DATA_INVALID");
                 send(new SignalData(SignalData.Command.CONTROL_SETTINGS, SignalData.Parameter.DATA_INVALID).getMessage());
                 uploadFails++;
             }
         } else {
-            System.out.println("Unexpected event received at state " + state.toString());
+            logger.info("Unexpected event received at state " + state.toString());
             state = State.APP_LOOP;
             debugTask.start();
         }
@@ -425,14 +429,14 @@ public class UavSimulator implements CommInterface.CommInterfaceListener,
     private void handleEventDownloadControlSettings(CommEvent event) throws Exception {
         // Download is from user perspective, here data is send to application
         if (handleSignalPayloadAck(controlSettings, event)) {
-            System.out.println("Control settings download procedure done successfully.");
+            logger.info("Control settings download procedure done successfully.");
             debugTask.start();
             state = State.APP_LOOP;
         }
     }
 
     private void handleEventUploadRouteContainer(CommEvent event) throws Exception {
-        System.out.println("Starting RouteContainer upload procedure...");
+        logger.info("Starting RouteContainer upload procedure...");
 
         if (event.getType() == CommEvent.EventType.SIGNAL_PAYLOAD_RECEIVED
                 && ((SignalPayloadEvent) event).getDataType() == SignalData.Command.ROUTE_CONTAINER_DATA) {
@@ -442,22 +446,22 @@ public class UavSimulator implements CommInterface.CommInterfaceListener,
 
             if (routeContainer.isValid()) {
                 state = State.APP_LOOP;
-                System.out.println("RouteContainer upload procedure done successfully");
+                logger.info("RouteContainer upload procedure done successfully");
                 send(new SignalData(SignalData.Command.ROUTE_CONTAINER, SignalData.Parameter.ACK).getMessage());
                 this.routeContainer = routeContainer;
                 debugTask.start();
             } else if (uploadRouteFails >= 3) {
                 state = State.APP_LOOP;
-                System.out.println("Uploading RouteContainer procedure Timeout");
+                logger.info("Uploading RouteContainer procedure Timeout");
                 send(new SignalData(SignalData.Command.ROUTE_CONTAINER, SignalData.Parameter.TIMEOUT).getMessage());
                 debugTask.start();
             } else {
-                System.out.println("Uploading RouteContainer procedure failed, application reports DATA_INVALID, retransmitting...");
+                logger.info("Uploading RouteContainer procedure failed, application reports DATA_INVALID, retransmitting...");
                 send(new SignalData(SignalData.Command.ROUTE_CONTAINER, SignalData.Parameter.DATA_INVALID).getMessage());
                 uploadRouteFails++;
             }
         } else {
-            System.out.println("Unexpected event received at state " + state.toString());
+            logger.info("Unexpected event received at state " + state.toString());
             state = State.APP_LOOP;
             debugTask.start();
         }
@@ -466,7 +470,7 @@ public class UavSimulator implements CommInterface.CommInterfaceListener,
     private void handleEventDownloadRouteContainer(CommEvent event) throws Exception {
         // Download is from user perspective, here data is send to application
         if (handleSignalPayloadAck(routeContainer, event)) {
-            System.out.println("Route container download procedure done successfully.");
+            logger.info("Route container download procedure done successfully.");
             debugTask.start();
             state = State.APP_LOOP;
         }
@@ -494,12 +498,12 @@ public class UavSimulator implements CommInterface.CommInterfaceListener,
             return true;
 
         } else if (event.matchSignalData(new SignalData(data.getDataCommand(), SignalData.Parameter.DATA_INVALID))) {
-            System.out.println("Sending " + data.getDataCommand().toString() + ", client reports DATA_INVALID, retransmitting...");
+            logger.info("Sending " + data.getDataCommand().toString() + ", client reports DATA_INVALID, retransmitting...");
             sendingProcedureFails++;
             send(data);
 
         } else if (event.matchSignalData(new SignalData(data.getDataCommand(), SignalData.Parameter.TIMEOUT))) {
-            System.out.println("Sending " + data.getDataCommand().toString() + ", client reports TIMEOUT, retransmitting...");
+            logger.info("Sending " + data.getDataCommand().toString() + ", client reports TIMEOUT, retransmitting...");
             sendingProcedureFails++;
             send(data);
 
@@ -645,7 +649,7 @@ public class UavSimulator implements CommInterface.CommInterfaceListener,
 
     @Override
     public void onConnected() {
-        System.out.println("UavSimulator : onConnected");
+        logger.info("UavSimulator : onConnected");
         dispatcher.reset();
         state = State.CONNECTING_APP_LOOP;
         connectionStage = ConnectionStage.INITIAL_COMMAND;
@@ -653,14 +657,14 @@ public class UavSimulator implements CommInterface.CommInterfaceListener,
 
     @Override
     public void onDisconnected() {
-        System.out.println("UavSimulator : onDisconnected");
+        logger.info("UavSimulator : onDisconnected");
         debugTask.stop();
         baseSetupTask.stop();
     }
 
     @Override
     public void onError(IOException e) {
-        System.out.println("UavSimulator : onError : " + e.getMessage());
+        logger.info("UavSimulator : onError : " + e.getMessage());
     }
 
     @Override
@@ -679,7 +683,7 @@ public class UavSimulator implements CommInterface.CommInterfaceListener,
             simulateSensors();
             DebugData debugData = getDebugDataToSend();
             send(debugData.getMessage());
-            //System.out.println("Debug: " + debugData.toString());
+            logger.debug("Debug: " + debugData.toString());
         }
     };
 
@@ -699,7 +703,7 @@ public class UavSimulator implements CommInterface.CommInterfaceListener,
                 data.setAbsoluteAltitude(actualDebug.getAbsoluteAltitude());
                 data.setRelativeAltitude(actualDebug.getRelativeAltitude());
                 data.setType(AutopilotData.Type.BASE);
-                System.out.println("Sending base position after IDLE mode " + data.toString());
+                logger.info("Sending base position after IDLE mode " + data.toString());
                 send(data.getMessage());
             }
             stop();

@@ -3,11 +3,15 @@ package com.skydive.actions;
 import com.skydive.CommHandler;
 import com.skydive.events.CommEvent;
 import com.skydive.events.UserEvent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Created by NawBar on 2016-10-12.
  */
 public abstract class CommHandlerAction {
+
+    protected static Logger logger = LoggerFactory.getLogger(CommHandlerAction.class);
 
     protected CommHandler commHandler;
 
@@ -37,7 +41,7 @@ public abstract class CommHandlerAction {
     public abstract void handleEvent(CommEvent event) throws Exception;
 
     public void notifyUserEvent(UserEvent userEvent) {
-        System.out.println("User event handled by base handler, no action");
+        logger.info("User event handled by base handler, no action");
     }
 
     public abstract ActionType getActionType();
