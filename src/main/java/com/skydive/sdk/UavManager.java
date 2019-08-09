@@ -1,7 +1,6 @@
 package com.skydive.sdk;
 
 import com.skydive.sdk.actions.CommHandlerAction;
-import com.skydive.data.*;
 import com.skydive.sdk.data.*;
 import com.skydive.sdk.events.UserEvent;
 import org.slf4j.Logger;

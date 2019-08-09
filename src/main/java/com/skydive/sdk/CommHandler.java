@@ -1,13 +1,12 @@
 package com.skydive.sdk;
 
-import com.skydive.actions.*;
+import com.skydive.sdk.actions.*;
 import com.skydive.sdk.data.ControlData;
 import com.skydive.sdk.data.SignalData;
 import com.skydive.sdk.data.SignalPayloadData;
 import com.skydive.sdk.events.CommEvent;
 import com.skydive.sdk.events.MessageEvent;
 import com.skydive.sdk.events.UserEvent;
-import com.skydive.sdk.actions.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

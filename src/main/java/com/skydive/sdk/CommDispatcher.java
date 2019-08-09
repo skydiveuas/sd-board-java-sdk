@@ -1,6 +1,5 @@
 package com.skydive.sdk;
 
-import com.skydive.data.*;
 import com.skydive.sdk.data.*;
 import com.skydive.sdk.events.CommEvent;
 import com.skydive.sdk.events.MessageEvent;
