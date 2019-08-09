@@ -14,6 +14,10 @@ public abstract class CommInterface {
         this.listener = listener;
     }
 
+    public CommInterfaceListener getListener() {
+        return this.listener;
+    }
+
     public abstract void connect();
 
     public abstract void disconnect();
