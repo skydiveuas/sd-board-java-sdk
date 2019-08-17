@@ -8,6 +8,7 @@ public class UavEvent {
     public enum Type {
         CONNECTED,
         DISCONNECTED,
+        WARNING,
         ERROR,
         MESSAGE,
         CALIBRATION_NON_STATIC,
@@ -17,6 +18,8 @@ public class UavEvent {
         CONTROL_UPDATED,
         ROUTE_UPDATED,
         PING_UPDATED,
+        CONTROL_UPLOADED,
+        ROUTE_UPLOADED,
         FLIGHT_STARTED,
         FLIGHT_ENDED,
         MAGNETOMETER_CALIBRATION_STARTED,

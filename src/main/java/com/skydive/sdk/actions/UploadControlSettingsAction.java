@@ -76,12 +76,13 @@ public class UploadControlSettingsAction extends CommHandlerAction {
             case WAITING_FOR_ACK:
                 if (event.matchSignalData(new SignalData(SignalData.Command.CONTROL_SETTINGS, SignalData.Parameter.ACK))) {
                     logger.info("Control settings uploaded");
-                    commHandler.getUavManager().notifyUavEvent(new UavEvent(UavEvent.Type.MESSAGE, "Control settings uploaded successfully!"));
+                    commHandler.getUavManager().notifyUavEvent(new UavEvent(UavEvent.Type.CONTROL_UPLOADED));
                     uploadProcedureDone = true;
                     commHandler.notifyActionDone();
                 } else if (event.matchSignalData(new SignalData(SignalData.Command.CONTROL_SETTINGS, SignalData.Parameter.DATA_INVALID))
                         || event.matchSignalData(new SignalData(SignalData.Command.CONTROL_SETTINGS, SignalData.Parameter.TIMEOUT))) {
                     logger.info("Uploading Control Settings failed!");
+                    commHandler.getUavManager().notifyUavEvent(new UavEvent(UavEvent.Type.WARNING, "Uploading Control Settings failed!"));
                     commHandler.send(controlSettingsToUpload);
                 } else {
                     logger.info("Unexpected event received at state " + state.toString());

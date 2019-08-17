@@ -70,16 +70,13 @@ public class UploadRouteContainerAction extends CommHandlerAction {
             case UPLOADING_DATA:
                 if (event.matchSignalData(new SignalData(SignalData.Command.ROUTE_CONTAINER, SignalData.Parameter.ACK))) {
                     logger.info("Route Container settings uploaded");
-                    commHandler.getUavManager().notifyUavEvent(new UavEvent(UavEvent.Type.MESSAGE, "Route Container settings uploaded successfully!"));
+                    commHandler.getUavManager().notifyUavEvent(new UavEvent(UavEvent.Type.ROUTE_UPLOADED));
                     uploadProcedureDone = true;
                     commHandler.notifyActionDone();
-                } else if (event.matchSignalData(new SignalData(SignalData.Command.ROUTE_CONTAINER, SignalData.Parameter.DATA_INVALID))) {
-                    commHandler.getUavManager().notifyUavEvent(new UavEvent(UavEvent.Type.MESSAGE, "Uploading Route Container settings failed!"));
-                    logger.info("Route Container settings sent but the data is invalid, responding with DATA_INVALID");
-                    commHandler.send(routeContainerToUpload);
-                } else if (event.matchSignalData(new SignalData(SignalData.Command.ROUTE_CONTAINER, SignalData.Parameter.TIMEOUT))) {
-                    commHandler.getUavManager().notifyUavEvent(new UavEvent(UavEvent.Type.MESSAGE, "Uploading Route Container settings timeout!"));
-                    logger.info("Uploading Route Container procedure timeout, responding with TIMEOUT");
+                } else if (event.matchSignalData(new SignalData(SignalData.Command.UPLOAD_ROUTE, SignalData.Parameter.DATA_INVALID))
+                        || event.matchSignalData(new SignalData(SignalData.Command.UPLOAD_ROUTE, SignalData.Parameter.TIMEOUT))) {
+                    logger.info("Uploading Control Settings failed!");
+                    commHandler.getUavManager().notifyUavEvent(new UavEvent(UavEvent.Type.WARNING, "Uploading Route Container failed!"));
                     commHandler.send(routeContainerToUpload);
                 } else {
                     logger.info("Unexpected event received at state " + state.toString());

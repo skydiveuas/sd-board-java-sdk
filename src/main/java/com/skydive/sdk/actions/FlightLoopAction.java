@@ -72,7 +72,7 @@ public class FlightLoopAction extends CommHandlerAction {
                                 logger.info("Flight loop not allowed!");
                                 flightLoopDone = true;
                                 commHandler.notifyActionDone();
-                                commHandler.getUavManager().notifyUavEvent(new UavEvent(UavEvent.Type.MESSAGE, "Flight loop not allowed!"));
+                                commHandler.getUavManager().notifyUavEvent(new UavEvent(UavEvent.Type.WARNING, "Flight loop not allowed!"));
 
                             } else {
                                 logger.info("Unexpected event received!!!");
@@ -92,7 +92,7 @@ public class FlightLoopAction extends CommHandlerAction {
                         logger.info("Flight control settings received successfully");
 
                     } else {
-                        logger.info("Route container received but the data is invalid, responding with DATA_INVALID");
+                        logger.info("Control settings received but the data is invalid, responding with DATA_INVALID");
                         commHandler.send(new SignalData(SignalData.Command.CONTROL_SETTINGS, SignalData.Parameter.DATA_INVALID).getMessage());
                         break;
                     }
