@@ -4,11 +4,15 @@ import com.skydive.sdk.CommHandler;
 import com.skydive.sdk.UavEvent;
 import com.skydive.sdk.data.SignalData;
 import com.skydive.sdk.events.CommEvent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Created by nawba on 17.10.2016.
  */
 public class DisconnectAction extends CommHandlerAction {
+
+    private static Logger logger = LoggerFactory.getLogger(DisconnectAction.class);
 
     private boolean disconnectionProcedureDone;
 

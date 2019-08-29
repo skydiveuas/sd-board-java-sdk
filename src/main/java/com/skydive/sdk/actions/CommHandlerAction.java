@@ -11,7 +11,7 @@ import org.slf4j.LoggerFactory;
  */
 public abstract class CommHandlerAction {
 
-    protected static Logger logger = LoggerFactory.getLogger(CommHandlerAction.class);
+    private static Logger logger = LoggerFactory.getLogger(CommHandlerAction.class);
 
     protected CommHandler commHandler;
 

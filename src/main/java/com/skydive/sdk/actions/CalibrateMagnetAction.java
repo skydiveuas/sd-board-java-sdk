@@ -9,12 +9,16 @@ import com.skydive.sdk.events.CommEvent;
 import com.skydive.sdk.events.MessageEvent;
 import com.skydive.sdk.events.SignalPayloadEvent;
 import com.skydive.sdk.events.UserEvent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Created by nawbar on 12.01.2017.
  */
 
 public class CalibrateMagnetAction extends CommHandlerAction {
+
+    private static Logger logger = LoggerFactory.getLogger(CalibrateMagnetAction.class);
 
     public enum CalibrationState {
         IDLE,

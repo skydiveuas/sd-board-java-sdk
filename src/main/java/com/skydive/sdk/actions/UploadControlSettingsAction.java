@@ -7,6 +7,8 @@ import com.skydive.sdk.data.SignalData;
 import com.skydive.sdk.data.SignalPayloadData;
 import com.skydive.sdk.events.CommEvent;
 import com.skydive.sdk.events.MessageEvent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Created by nawbar on 12.01.2017.
@@ -14,9 +16,11 @@ import com.skydive.sdk.events.MessageEvent;
 
 public class UploadControlSettingsAction extends CommHandlerAction {
 
+    private static Logger logger = LoggerFactory.getLogger(UploadControlSettingsAction.class);
+
     public enum UploadState {
         IDLE,
-        INITIAL_COMAND,
+        INITIAL_COMMAND,
         WAITING_FOR_ACK
 
     }
@@ -37,7 +41,7 @@ public class UploadControlSettingsAction extends CommHandlerAction {
     @Override
     public void start() {
         logger.info("Starting upload control settings procedure");
-        state = UploadState.INITIAL_COMAND;
+        state = UploadState.INITIAL_COMMAND;
         commHandler.stopCommTask(commHandler.getPingTask());
         commHandler.send(new SignalData(SignalData.Command.UPLOAD_SETTINGS, SignalData.Parameter.START).getMessage());
 
@@ -52,7 +56,7 @@ public class UploadControlSettingsAction extends CommHandlerAction {
     public void handleEvent(CommEvent event) throws Exception {
         UploadState actualState = state;
         switch (state) {
-            case INITIAL_COMAND:
+            case INITIAL_COMMAND:
                 if (event.getType() == CommEvent.EventType.MESSAGE_RECEIVED) {
                     switch (((MessageEvent) event).getMessageType()) {
                         case CONTROL:

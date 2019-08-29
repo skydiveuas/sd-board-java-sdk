@@ -8,11 +8,15 @@ import com.skydive.sdk.data.CalibrationSettings;
 import com.skydive.sdk.data.SignalData;
 import com.skydive.sdk.events.CommEvent;
 import com.skydive.sdk.events.SignalPayloadEvent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Created by Bartosz Nawrot on 2016-10-13.
  */
 public class ConnectAction extends CommHandlerAction {
+
+    private static Logger logger = LoggerFactory.getLogger(ConnectAction.class);
 
     private static final long CONNECTION_TIMEOUT = 5000;
 

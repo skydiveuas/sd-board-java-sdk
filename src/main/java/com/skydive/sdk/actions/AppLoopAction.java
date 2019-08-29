@@ -5,11 +5,15 @@ import com.skydive.sdk.CommMessage;
 import com.skydive.sdk.data.DebugData;
 import com.skydive.sdk.events.CommEvent;
 import com.skydive.sdk.events.MessageEvent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Created by Bartosz Nawrot on 2016-10-14.
  */
 public class AppLoopAction extends CommHandlerAction {
+
+    private static Logger logger = LoggerFactory.getLogger(AppLoopAction.class);
 
     public AppLoopAction(CommHandler commHandler) {
         super(commHandler);
@@ -27,7 +31,7 @@ public class AppLoopAction extends CommHandlerAction {
 
     @Override
     public void start() {
-        logger.info("AppLoopAction: Starting app loop handling mode");
+        logger.info("Starting app loop handling mode");
         commHandler.startCommTask(commHandler.getPingTask());
     }
 
@@ -40,7 +44,7 @@ public class AppLoopAction extends CommHandlerAction {
                 // debug data received
                 commHandler.getUavManager().setDebugData(new DebugData(messageEvent.getMessage()));
             } else {
-                logger.info("AppLoopAction: Unexpected massage received: " + messageEvent.toString());
+                logger.warn("Unexpected massage received: {}", messageEvent.toString());
             }
         }
     }

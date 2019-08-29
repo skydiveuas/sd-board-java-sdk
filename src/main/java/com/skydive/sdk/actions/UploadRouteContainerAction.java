@@ -7,12 +7,16 @@ import com.skydive.sdk.data.SignalData;
 import com.skydive.sdk.data.SignalPayloadData;
 import com.skydive.sdk.events.CommEvent;
 import com.skydive.sdk.events.MessageEvent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Created by nawba on 12.01.2017.
  */
 
 public class UploadRouteContainerAction extends CommHandlerAction {
+
+    private static Logger logger = LoggerFactory.getLogger(UploadRouteContainerAction.class);
 
     public enum UploadState {
         IDLE,

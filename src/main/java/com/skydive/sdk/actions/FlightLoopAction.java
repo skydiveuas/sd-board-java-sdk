@@ -10,11 +10,15 @@ import com.skydive.sdk.events.CommEvent;
 import com.skydive.sdk.events.MessageEvent;
 import com.skydive.sdk.events.SignalPayloadEvent;
 import com.skydive.sdk.events.UserEvent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Created by Bartosz Nawrot on 2016-10-14.
  */
 public class FlightLoopAction extends CommHandlerAction {
+
+    private static Logger logger = LoggerFactory.getLogger(FlightLoopAction.class);
 
     public enum FlightLoopState {
         IDLE,

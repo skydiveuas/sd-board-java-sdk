@@ -7,12 +7,16 @@ import com.skydive.sdk.data.SignalData;
 import com.skydive.sdk.events.CommEvent;
 import com.skydive.sdk.events.MessageEvent;
 import com.skydive.sdk.events.SignalPayloadEvent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Created by nawbar on 12.01.2017.
  */
 
 public class DownloadControlSettingsAction extends CommHandlerAction {
+
+    private static Logger logger = LoggerFactory.getLogger(DownloadControlSettingsAction.class);
 
     private enum DownloadState {
         IDLE,
