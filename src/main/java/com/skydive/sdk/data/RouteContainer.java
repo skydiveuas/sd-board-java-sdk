@@ -72,11 +72,13 @@ public class RouteContainer implements SignalPayloadData {
 
         @Override
         public String toString() {
-            return "latitude: " + latitude
-                    + ", longitude: " + longitude
-                    + ", absolute: " + absoluteAltitude
-                    + ", relative: " + relativeAltitude
-                    + ", velocity: " + velocity;
+            return "Waypoint{" +
+                    "latitude=" + latitude +
+                    ", longitude=" + longitude +
+                    ", absoluteAltitude=" + absoluteAltitude +
+                    ", relativeAltitude=" + relativeAltitude +
+                    ", velocity=" + velocity +
+                    '}';
         }
     }
 
@@ -217,5 +219,15 @@ public class RouteContainer implements SignalPayloadData {
 
     public void setCrc() {
         this.crcValue = computeCrc();
+    }
+
+    @Override
+    public String toString() {
+        return "RouteContainer{" +
+                "routeSize=" + routeSize +
+                ", waypointTime=" + waypointTime +
+                ", baseTime=" + baseTime +
+                ", route=" + route +
+                '}';
     }
 }
